@@ -1,0 +1,132 @@
+<div class="d-flex bg-light min-vh-100">
+  <app-faculty-sidebar></app-faculty-sidebar>
+
+  <div class="main-content flex-grow-1 p-4">
+    <!-- Premium Header -->
+    <div class="portal-header d-flex justify-content-between align-items-center animate-up">
+      <div>
+        <h2 class="fw-bold mb-1">Faculty Suggestion Portal</h2>
+        <p class="mb-0 opacity-75">Submit ideas to Admin and manage student feedback</p>
+      </div>
+      <div class="d-none d-md-block">
+        <i class="fas fa-comments fa-3x opacity-25"></i>
+      </div>
+    </div>
+
+    <div class="container-fluid p-0">
+      <div class="row g-4">
+        <!-- LEFT COLUMN: POST TO ADMIN -->
+        <div class="col-lg-5 animate-up" style="animation-delay: 0.1s;">
+          <div class="premium-card">
+            <div class="section-title">
+              <i><i class="fas fa-paper-plane"></i></i>
+              Post to Administration
+            </div>
+
+            <div *ngIf="feedback.msg" class="alert alert-{{feedback.type}} border-0 shadow-sm rounded-4 mb-4 animate-up">
+              <i class="fas me-2" [class.fa-check-circle]="feedback.type==='success'" [class.fa-exclamation-circle]="feedback.type==='danger'"></i>
+              {{feedback.msg}}
+            </div>
+            
+            <form #suggestForm="ngForm" (ngSubmit)="onSubmit()">
+              <div class="mb-4">
+                <label class="form-label small fw-bold text-muted text-uppercase">Subject Title</label>
+                <input type="text" class="form-control glass-input" [(ngModel)]="form.title" name="title" placeholder="e.g. System upgrade, Lab issues..." required>
+              </div>
+              <div class="mb-4">
+                <label class="form-label small fw-bold text-muted text-uppercase">Detailed Message</label>
+                <textarea class="form-control glass-input" rows="6" [(ngModel)]="form.message" name="message" placeholder="Type your suggestion to the Principal/Admin here..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-submit w-100 py-3 shadow-sm" [disabled]="isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                <i class="fas fa-shield-alt me-2" *ngIf="!isLoading"></i>
+                Submit to Administration
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: DUAL DASHBOARD (INBOX + HISTORY) -->
+        <div class="col-lg-7 animate-up" style="animation-delay: 0.2s;">
+          <div class="premium-card">
+            
+            <!-- 📥 SECTION 1: STUDENT FEEDBACK (INBOX) -->
+            <div class="section-title">
+              <i><i class="fas fa-inbox"></i></i>
+              Student Feedback & Issues
+            </div>
+
+            <div class="history-list overflow-auto pe-2 mb-5" style="max-height: 400px;">
+              <div *ngFor="let s of studentSuggestions" class="history-item">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="student-avatar" style="width: 30px; height: 30px; font-size: 0.8rem;">{{ s.studentName ? s.studentName.charAt(0) : 'S' }}</div>
+                    <div>
+                      <h6 class="fw-bold text-dark mb-0">{{ s.title }}</h6>
+                      <small class="text-muted" style="font-size: 0.65rem;">From: {{ s.studentName }} (ID: {{ s.studentId }})</small>
+                    </div>
+                  </div>
+                  <span class="badge rounded-pill px-2 py-1" 
+                        [ngClass]="{
+                          'badge-pending': s.status === 'Pending',
+                          'badge-resolved': s.status === 'Resolved',
+                          'badge-reviewed': s.status === 'Reviewed'
+                        }" style="font-size: 0.6rem;">
+                    {{ s.status }}
+                  </span>
+                </div>
+                <p class="small text-secondary mb-2">{{ s.message }}</p>
+                
+                <div class="reply-bubble" *ngIf="s.reply && s.reply !== 'Not Yet !'">
+                  <div class="reply-header">
+                    <i class="fas fa-reply"></i> Official Response
+                  </div>
+                  <p class="mb-0 text-dark small italic">{{ s.reply }}</p>
+                </div>
+              </div>
+
+              <div *ngIf="studentSuggestions.length === 0" class="text-center py-4 text-muted border rounded-3 bg-light opacity-50">
+                <p class="small mb-0">No student feedback received yet.</p>
+              </div>
+            </div>
+
+            <!-- 📤 SECTION 2: MY SUGGESTIONS TO ADMIN (HISTORY) -->
+            <div class="section-title mt-4 pt-4 border-top">
+              <i><i class="fas fa-history"></i></i>
+              My Suggestions to Admin
+            </div>
+
+            <div class="history-list overflow-auto pe-2" style="max-height: 400px;">
+              <div *ngFor="let s of mySuggestions" class="history-item border-start border-4 border-primary">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h6 class="fw-bold text-dark mb-0">{{ s.title }}</h6>
+                  <span class="badge rounded-pill px-2 py-1 badge-pending" style="font-size: 0.6rem;">
+                    {{ s.status }}
+                  </span>
+                </div>
+                <p class="small text-secondary mb-2">{{ s.message }}</p>
+                
+                <div class="reply-bubble" style="background: #f8fafc; border-left-color: #64748b;" *ngIf="s.reply && s.reply !== 'Not Yet !'">
+                  <div class="reply-header" style="color: #64748b;">
+                    <i class="fas fa-user-shield"></i> Admin Remark
+                  </div>
+                  <p class="mb-0 text-dark small italic">{{ s.reply }}</p>
+                </div>
+
+                <div class="d-flex justify-content-between mt-2 pt-2 border-top" style="font-size: 0.6rem;">
+                   <span class="text-muted">ID: #{{ s.suggestionId }}</span>
+                   <span class="text-muted">{{ s.postedAt | date:'mediumDate' }}</span>
+                </div>
+              </div>
+
+              <div *ngIf="mySuggestions.length === 0" class="text-center py-4 text-muted border rounded-3 bg-light opacity-50">
+                <p class="small mb-0">No suggestions submitted to admin yet.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

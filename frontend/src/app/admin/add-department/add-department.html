@@ -1,0 +1,81 @@
+<div class="d-flex">
+  <app-admin-sidebar></app-admin-sidebar>
+
+  <div class="main-content flex-grow-1 p-4 bg-light">
+    <h2 class="mb-4 text-primary">
+      <i class="fa fa-plus"></i> Add Department
+    </h2>
+
+   <div *ngIf="message.text" [ngClass]="'alert alert-' + message.type" class="alert mt-3 shadow-sm">
+  {{ message.text }}
+</div>
+
+    <div class="card shadow-lg p-4 border-0 rounded-3">
+      <form #deptForm="ngForm" (ngSubmit)="deptForm.form.valid && handleSubmit()">
+        <div class="mb-4">
+          <label for="DepartmentName" class="form-label fw-bold small text-muted text-uppercase">
+            Department Name
+          </label>
+          <input
+            type="text"
+            id="DepartmentName"
+            name="departmentName"
+            class="form-control form-control-lg shadow-none border-2"
+            [class.is-invalid]="dname.invalid && dname.touched"
+            placeholder="e.g. Computer Science"
+            [(ngModel)]="departmentName"
+            #dname="ngModel"
+            required
+            minlength="2"
+          />
+          <div class="invalid-feedback">A valid department name is required (min 2 characters).</div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-bold small text-muted text-uppercase">
+            Department Logo / Image (Upload or URL)
+          </label>
+          <div class="input-group mb-2">
+            <span class="input-group-text bg-light"><i class="fa fa-link"></i></span>
+            <input
+              type="text"
+              name="ImageUrl"
+              class="form-control shadow-none border-2"
+              placeholder="Paste image URL here..."
+              [(ngModel)]="imageUrl"
+              (input)="onUrlInput()"
+            />
+          </div>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fa fa-upload"></i></span>
+            <input 
+              type="file" 
+              class="form-control shadow-none border-2" 
+              accept="image/*" 
+              (change)="onFileSelected($event)"
+            />
+          </div>
+          
+          <div class="mt-3 text-center p-3 border rounded bg-white" *ngIf="imageUrl">
+            <p class="small text-muted mb-2">Image Preview</p>
+            <img [src]="imageUrl" 
+                 (error)="imageUrlError = true; $any($event.target).style.display='none'"
+                 (load)="imageUrlError = false; $any($event.target).style.display='inline-block'"
+                 class="rounded shadow-sm" 
+                 style="max-width: 150px; max-height: 150px; object-fit: cover;" 
+                 alt="Preview">
+            <div *ngIf="imageUrlError" class="text-danger small fw-bold mt-2">
+              <i class="fa fa-exclamation-triangle"></i> Cannot load image. Ensure it's a valid image link or file.
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-3">
+          <button type="submit" class="btn btn-primary px-5 fw-bold rounded-pill shadow" [disabled]="deptForm.invalid">
+            <i class="fa fa-save me-2"></i> Save Department
+          </button>
+          <a routerLink="/view-departments" class="btn btn-outline-secondary px-4 rounded-pill">View All</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
